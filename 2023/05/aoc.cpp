@@ -14,7 +14,7 @@ void part1(ifstream &input) {
   long i, j, k, map_idx, cur_num, res = LONG_MAX;
   istringstream iss;
   vector<long> seeds;
-  vector<map<pair<long, long>, long>> maps(7);
+  vector<map<long, pair<long, long>>> maps(7);
 
   // get seeds
   getline(input, line);
@@ -32,7 +32,7 @@ void part1(ifstream &input) {
     iss.str(line);
 
     while(iss >> i >> j >> k) {
-      maps[map_idx].insert(make_pair(make_pair(j, k), i));
+      maps[map_idx].insert(make_pair(j, make_pair(i, k)));
       
       getline(input, line);
       iss.clear();
@@ -46,8 +46,8 @@ void part1(ifstream &input) {
     for(auto elem : map) {
       auto src = elem.first;
       auto dst = elem.second;
-      cout << src.first << " " << src.second << " -> ";
-      cout << dst << endl;
+      cout << src << " -> ";
+      cout << dst.first << " (" << dst.second << ")" << endl;
     }
     cout << endl;
   }
@@ -59,8 +59,8 @@ void part1(ifstream &input) {
     cur_num = seed;
     for(i = 0; i < maps.size(); i++) {
       for(auto elem : maps[i]) {
-        if(cur_num >= elem.first.first && cur_num < elem.first.first + elem.first.second) {
-          cur_num = elem.second + (cur_num - elem.first.first);
+        if(cur_num >= elem.first && cur_num < elem.first + elem.second.second) {
+          cur_num = elem.second.first + (cur_num - elem.first);
           break;
         }
       }
@@ -81,7 +81,7 @@ void part2(ifstream &input) {
   long i, j, k, map_idx, cur_num, res = LONG_MAX;
   istringstream iss;
   vector<pair<long, long>> seeds;
-  vector<map<pair<long, long>, long>> maps(7);
+  vector<map<long, pair<long, long>>> maps(7);
 
   // get seeds
   getline(input, line);
@@ -99,7 +99,7 @@ void part2(ifstream &input) {
     iss.str(line);
 
     while(iss >> i >> j >> k) {
-      maps[map_idx].insert(make_pair(make_pair(j, k), i));
+      maps[map_idx].insert(make_pair(j, make_pair(i, k)));
       
       getline(input, line);
       iss.clear();
@@ -113,25 +113,24 @@ void part2(ifstream &input) {
     for(auto elem : map) {
       auto src = elem.first;
       auto dst = elem.second;
-      cout << src.first << " " << src.second << " -> ";
-      cout << dst << endl;
+      cout << src << " -> ";
+      cout << dst.first << " (" << dst.second << ")" << endl;
     }
     cout << endl;
   }
 
   // map seeds to locations
-  // cout << "mappings:" << endl;
+  cout << "mappings:" << endl;
   for(auto seed_pair : seeds) {
     cout << seed_pair.first << " " << seed_pair.second << endl;
     for(j = seed_pair.first; j < seed_pair.first + seed_pair.second; j++) {
       // cout << j;
       cur_num = j;
       for(i = 0; i < maps.size(); i++) {
-        for(auto elem : maps[i]) {
-          if(cur_num >= elem.first.first && cur_num < elem.first.first + elem.first.second) {
-            cur_num = elem.second + (cur_num - elem.first.first);
-            break;
-          }
+        // go from O(n) to O(log n)!!!
+        auto elem = *(--maps[i].upper_bound(cur_num));
+        if(cur_num >= elem.first && cur_num < elem.first + elem.second.second) {
+          cur_num = elem.second.first + (cur_num - elem.first);
         }
         // cout << " -> " << cur_num;
         // if not found, cur_num is already identity mapped and ready for the next map
@@ -141,7 +140,7 @@ void part2(ifstream &input) {
       res = min(res, cur_num);
     }
   }
-  // cout << endl;
+  cout << endl;
 
   cout << "answer: " << res << endl;
 }
